@@ -88,6 +88,7 @@ python manage.py runserver
 ## 🌐 Deployment
 
 This project is deployed using Render.
+https://disease-prediction-6vgb.onrender.com/
 
 ## ⚠️ Disclaimer
 
