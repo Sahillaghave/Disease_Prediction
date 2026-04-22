@@ -1,23 +1,18 @@
 import pickle
 import pandas as pd
 from django.shortcuts import render
+import os
 
-# ================================
-# LOAD MODEL FILES
-# ================================
-model = pickle.load(open('predictor/model.pkl', 'rb'))
-vectorizer = pickle.load(open('predictor/vectorizer.pkl', 'rb'))
-le = pickle.load(open('predictor/label_encoder.pkl', 'rb'))
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-# ================================
-# LOAD CSV DATA
-# ================================
-desc = pd.read_csv('predictor/disease_description.csv')
-prec = pd.read_csv('predictor/disease_precaution.csv')
+model = pickle.load(open(os.path.join(BASE_DIR, 'predictor/model.pkl'), 'rb'))
+vectorizer = pickle.load(open(os.path.join(BASE_DIR, 'predictor/vectorizer.pkl'), 'rb'))
+le = pickle.load(open(os.path.join(BASE_DIR, 'predictor/label_encoder.pkl'), 'rb'))
 
-# ================================
+desc = pd.read_csv(os.path.join(BASE_DIR, 'predictor/disease_description.csv'))
+prec = pd.read_csv(os.path.join(BASE_DIR, 'predictor/disease_precaution.csv'))
+
 # CREATE DICTIONARIES
-# ================================
 desc_dict = dict(zip(desc.iloc[:, 0], desc.iloc[:, 1]))
 
 prec_dict = {}
@@ -27,16 +22,12 @@ for _, row in prec.iterrows():
     prec_dict[disease] = precautions
 
 
-# ================================
 # CLEAN INPUT
-# ================================
 def clean_input(text):
     return text.lower().replace(',', ' ')
 
 
-# ================================
 # CONVERT CONFIDENCE TO LEVEL
-# ================================
 def get_confidence_level(conf):
     if conf > 0.6:
         return "High"
