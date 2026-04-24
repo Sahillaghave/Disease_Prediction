@@ -5,9 +5,9 @@ import os
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-model = pickle.load(open(os.path.join(BASE_DIR, 'predictor/model.pkl'), 'rb'))
-vectorizer = pickle.load(open(os.path.join(BASE_DIR, 'predictor/vectorizer.pkl'), 'rb'))
-le = pickle.load(open(os.path.join(BASE_DIR, 'predictor/label_encoder.pkl'), 'rb'))
+vectorizer = pickle.load(open(os.path.join(BASE_DIR, 'predictor/vectorizer_new.pkl'), 'rb'))
+model = pickle.load(open(os.path.join(BASE_DIR, 'predictor/model_new.pkl'), 'rb'))
+le = pickle.load(open(os.path.join(BASE_DIR, 'predictor/le_new.pkl'), 'rb'))
 
 desc = pd.read_csv(os.path.join(BASE_DIR, 'predictor/disease_description.csv'))
 prec = pd.read_csv(os.path.join(BASE_DIR, 'predictor/disease_precaution.csv'))
