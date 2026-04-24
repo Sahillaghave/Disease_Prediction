@@ -9,6 +9,15 @@ vectorizer = pickle.load(open(os.path.join(BASE_DIR, 'predictor/vectorizer_new.p
 model = pickle.load(open(os.path.join(BASE_DIR, 'predictor/model_new.pkl'), 'rb'))
 le = pickle.load(open(os.path.join(BASE_DIR, 'predictor/label_encoder_new.pkl'), 'rb'))
 
+# 🔥 ADD DEBUG HERE (RIGHT BELOW LOADING)
+print("=== VECTORIZER DEBUG ===")
+path = os.path.join(BASE_DIR, 'predictor/vectorizer_new.pkl')
+print("Path:", path)
+print("Exists:", os.path.exists(path))
+print("Fitted:", hasattr(vectorizer, "idf_"))
+print("Vocab size:", len(getattr(vectorizer, "vocabulary_", {})))
+print("=== END DEBUG ===")
+
 desc = pd.read_csv(os.path.join(BASE_DIR, 'predictor/disease_description.csv'))
 prec = pd.read_csv(os.path.join(BASE_DIR, 'predictor/disease_precaution.csv'))
 
@@ -41,7 +50,6 @@ def get_confidence_level(conf):
 # PREDICTION FUNCTION
 # ================================
 def predict_disease(text):
-    text_vec = vectorizer.transform([text])
 
     pred = model.predict(text_vec)
     disease = le.inverse_transform(pred)[0]
