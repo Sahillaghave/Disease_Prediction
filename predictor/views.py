@@ -5,23 +5,15 @@ import os
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-vectorizer = pickle.load(open(os.path.join(BASE_DIR, 'predictor/vectorizer_new.pkl'), 'rb'))
-model = pickle.load(open(os.path.join(BASE_DIR, 'predictor/model_new.pkl'), 'rb'))
-le = pickle.load(open(os.path.join(BASE_DIR, 'predictor/label_encoder_new.pkl'), 'rb'))
+# Load pipeline
+pipeline = pickle.load(open(os.path.join(BASE_DIR, 'predictor/pipeline.pkl'), 'rb'))
+le = pickle.load(open(os.path.join(BASE_DIR, 'predictor/label_encoder.pkl'), 'rb'))
 
-# 🔥 ADD DEBUG HERE (RIGHT BELOW LOADING)
-print("=== VECTORIZER DEBUG ===")
-path = os.path.join(BASE_DIR, 'predictor/vectorizer_new.pkl')
-print("Path:", path)
-print("Exists:", os.path.exists(path))
-print("Fitted:", hasattr(vectorizer, "idf_"))
-print("Vocab size:", len(getattr(vectorizer, "vocabulary_", {})))
-print("=== END DEBUG ===")
-
+# Load CSVs
 desc = pd.read_csv(os.path.join(BASE_DIR, 'predictor/disease_description.csv'))
 prec = pd.read_csv(os.path.join(BASE_DIR, 'predictor/disease_precaution.csv'))
 
-# CREATE DICTIONARIES
+# Create dictionaries
 desc_dict = dict(zip(desc.iloc[:, 0], desc.iloc[:, 1]))
 
 prec_dict = {}
@@ -30,13 +22,11 @@ for _, row in prec.iterrows():
     precautions = [x for x in row.iloc[1:] if pd.notna(x)]
     prec_dict[disease] = precautions
 
-
-# CLEAN INPUT
+# Clean input
 def clean_input(text):
     return text.lower().replace(',', ' ')
 
-
-# CONVERT CONFIDENCE TO LEVEL
+# Confidence level
 def get_confidence_level(conf):
     if conf > 0.6:
         return "High"
@@ -45,25 +35,17 @@ def get_confidence_level(conf):
     else:
         return "Low"
 
-
-# ================================
-# PREDICTION FUNCTION
-# ================================
+# Prediction function
 def predict_disease(text):
-
-    pred = model.predict(text_vec)
+    pred = pipeline.predict([text])
     disease = le.inverse_transform(pred)[0]
 
-    probs = model.predict_proba(text_vec)[0]
+    probs = pipeline.predict_proba([text])[0]
     confidence = max(probs)
 
-    # Convert to %
     confidence_percent = round(confidence * 100, 2)
-
-    # Convert to level
     confidence_level = get_confidence_level(confidence)
 
-    # Top 3 predictions
     top3_idx = probs.argsort()[-3:][::-1]
     top3_diseases = le.inverse_transform(top3_idx)
 
@@ -72,10 +54,7 @@ def predict_disease(text):
 
     return disease, description, precautions, confidence_percent, confidence_level, top3_diseases
 
-
-# ================================
-# VIEW
-# ================================
+# View
 def home(request):
     result = None
     description = None
@@ -94,7 +73,7 @@ def home(request):
             symptoms = clean_input(symptoms)
 
             if len(symptoms.split()) < 3:
-                error = "⚠️ Enter at least 3 symptoms for better prediction"
+                error = "⚠️ Enter at least 3 symptoms"
             else:
                 result, description, precautions, confidence, confidence_level, top3 = predict_disease(symptoms)
 
